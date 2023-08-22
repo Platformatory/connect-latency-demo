@@ -1,0 +1,130 @@
+version: '3.8'
+services:
+  connect:
+    build:
+      context: .
+      dockerfile: Dockerfile    
+    hostname: connect
+    container_name: connect
+    networks:
+      - connect-sandbox
+    ports:
+      - 8083:8083
+      - 8082:8082
+    environment:
+      KAFKA_JMX_OPTS: "-javaagent:/usr/share/java/kafka/jmx_prometheus_javaagent.jar=8082:/etc/jmx-kafka-connect.yaml"
+      BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_GROUP_ID: "connect"
+      CONNECT_CONFIG_STORAGE_TOPIC: connect-sandbox-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: connect-sandbox-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: connect-sandbox-status
+      CONNECT_REPLICATION_FACTOR: 3
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 3
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "io.confluent.connect.avro.AvroConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "true"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
+      CONNECT_VALUE_CONVERTER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "connect"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+      CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
+      CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
+      # CLASSPATH required due to CC-2422
+      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar
+      # Connect worker
+      CONNECT_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      CONNECT_SASL_MECHANISM: PLAIN
+      # Connect producer
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
+      #CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
+      #CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: SASL_SSL
+      #CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      #CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: PLAIN
+      # Connect consumer
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
+      #CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
+      #CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: SASL_SSL
+      #CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      #CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: PLAIN
+    volumes: 
+      - ./jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
+      - ./kafka-connect.yml:/etc/jmx-kafka-connect.yaml
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
+    networks:
+      - connect-sandbox
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana_prometheus_datasource.yml:/etc/grafana/provisioning/datasources/grafana_prometheus_datasource.yaml
+      - ./grafana_kconnect_dashboard.yaml:/etc/grafana/provisioning/dashboards/grafana_kconnect_dashboard.yaml
+      - ./grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json      
+    networks:
+      - connect-sandbox
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    networks:
+      - connect-sandbox
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres_user
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_DB: postgres_db
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql_container
+    networks:
+      - connect-sandbox
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql_root_password
+      MYSQL_DATABASE: mysql_db
+      MYSQL_USER: mysql_user
+      MYSQL_PASSWORD: mysql_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  pgloader:
+    image: python:3
+    networks: 
+      - connect-sandbox
+    volumes:
+      - ./pgloader:/app  # Mount the current directory into /app in the container
+    working_dir: /app  # Working directory inside the container
+    command: ["/app/init.sh"]
+
+networks:
+  connect-sandbox:
+
+volumes:
+  postgres_data:
+    driver: local
+  mysql_data:
+    driver: local
