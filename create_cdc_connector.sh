@@ -16,7 +16,9 @@ PAYLOAD=$(cat <<- JSON
     "database.port": "5432",
     "database.user": "postgres_user",
     "database.password": "postgres_password",
-    "topic.prefix": "debzcdc" 
+    "topic.prefix": "debzcdc",
+    "topic.creation.default.replication.factor": 3,
+    "topic.creation.default.partitions": 6 
   }
 }
 JSON

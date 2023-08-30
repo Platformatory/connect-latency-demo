@@ -14,6 +14,8 @@ CONFIG_JSON=$(cat <<- JSON
     "mode": "incrementing",
     "incrementing.column.name": "id",
     "topic.prefix": "jdbc-source-",
+    "topic.creation.default.replication.factor": 3,
+    "topic.creation.default.partitions": 6,
     "table.whitelist": "orders,users",
     "poll.interval.ms": 60000,
     "batch.max.rows": 100
