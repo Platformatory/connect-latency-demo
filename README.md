@@ -83,3 +83,6 @@ docker-compose down -v
 ```bash
 docker-compose up -d kafka-prom-push --build
 ```
+
+> **Push any changes to the `latency-kafka-prom-push` directory separately since it is a git submodule.**
+> **Once the git submodule is pushed, make a commit to the parent repo, i.e, `connect-sandbox` repo in the `latency-analyzer` branch**
