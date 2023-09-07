@@ -18,7 +18,7 @@ for ((i=0; i<=${#values[@]} - 1; i++)); do
     arg="${values[i]}"
     text="$text
 
-CREATE STREAM "$arg"_input_stream (
+CREATE STREAM IF NOT EXISTS "$arg"_input_stream (
     correlation_id STRING,
     connect_pipeline_id STRING,
     timestamp_type STRING,
@@ -30,7 +30,7 @@ CREATE STREAM "$arg"_input_stream (
 "
     if [ "$i" == 0 ]; then
         text="$text
-CREATE STREAM connect_latency_stream WITH (kafka_topic='connect_latency_stream', value_format='AVRO', partitions=1) AS 
+CREATE STREAM IF NOT EXISTS connect_latency_stream WITH (kafka_topic='connect_latency_stream', value_format='AVRO', partitions=1) AS 
 SELECT * FROM "$arg"_input_stream;"
     else
         text="$text
@@ -40,7 +40,7 @@ done
 
 text="$text
 
-CREATE TABLE connect_latency_table WITH (kafka_topic='connect_latency_table', key_format = 'AVRO', partitions=1) AS 
+CREATE TABLE IF NOT EXISTS connect_latency_table WITH (kafka_topic='connect_latency_table', key_format = 'AVRO', partitions=1) AS 
 SELECT STRUCT(correlation_id := CORRELATION_ID, connect_pipeline_id := CONNECT_PIPELINE_ID) AS table_key, 
 LATEST_BY_OFFSET(CORRELATION_ID) AS CORRELATION_ID, 
 LATEST_BY_OFFSET(CONNECT_PIPELINE_ID) AS CONNECT_PIPELINE_ID, 
@@ -48,7 +48,7 @@ AS_MAP(COLLECT_LIST(TIMESTAMP_TYPE), COLLECT_lIST(TIMESTAMP)) AS timestamp_data
 FROM connect_latency_stream
 GROUP BY STRUCT(correlation_id := CORRELATION_ID, connect_pipeline_id := CONNECT_PIPELINE_ID);
 
-CREATE TABLE final_latency_table with (kafka_topic='final_latency_data', key_format='AVRO', value_format='AVRO', partitions=1) AS SELECT
+CREATE TABLE IF NOT EXISTS final_latency_table with (kafka_topic='final_latency_data', key_format='AVRO', value_format='AVRO', partitions=1) AS SELECT
 table_key,
 UNIX_TIMESTAMP() as ts,
 correlation_id,
