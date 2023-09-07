@@ -2,6 +2,16 @@
 
 ## Setup
 
+```sh
+# Clone using SSH
+git clone git@github.com:Platformatory/connect-sandbox.git
+```
+
+```sh
+# This is run only once after cloning the repo
+git submodule update --init --recursive
+```
+
 ### Environment variables
 
 ```bash
