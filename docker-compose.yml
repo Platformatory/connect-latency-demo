@@ -114,12 +114,16 @@ services:
       SASL_USERNAME: $SASL_USERNAME
       SASL_PASSWORD: $SASL_PASSWORD
       SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
-      SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO 
+      SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+    networks:
+      - connect-sandbox
 
   prom-pushgateway:
     image: prom/pushgateway:latest
     ports:
       - 9091:9091
+    networks:
+      - connect-sandbox
 
   prometheus:
     image: prom/prometheus:latest
