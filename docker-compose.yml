@@ -1,5 +1,12 @@
 version: '3.8'
 services:
+  init:
+    image: maven:3.5-jdk-11
+    working_dir: /mnt/interceptor
+    command: mvn clean package
+    volumes:
+      - ./interceptor:/mnt/interceptor
+    restart: on-failure
   connect:
     build:
       context: .
@@ -75,7 +82,7 @@ services:
 
 
     volumes: 
-      - ../Interceptor/target/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
+      - ./interceptor/target/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
       - ./jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
       - ./kafka-connect.yml:/etc/jmx-kafka-connect.yaml
       - ./json-spooldir-source.json:/home/appuser/data/source/json-spooldir-source.json
@@ -115,7 +122,7 @@ services:
       KAFKA_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
       SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
       SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
-      CONSUMER_GROUP_ID: kfk-prom-push
+      CONSUMER_GROUP_ID: kfk-prom-psh
     networks:
       - connect-sandbox
 

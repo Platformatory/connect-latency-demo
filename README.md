@@ -29,6 +29,10 @@ export INPUT_TOPICS=connect_latency
 ## Start
 
 ```bash
+docker-compose up -d init
+# Wait for the init container to exit with code 0
+# The init container builds the Interceptor jar
+
 docker-compose up -d
 ```
 
