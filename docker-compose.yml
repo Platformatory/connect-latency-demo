@@ -109,12 +109,13 @@ services:
   kafka-prom-push:
     build: ./latency-kafka-prom-push
     environment:
-      PUSH_GATEWAY: http://prom-pushgateway:9091
+      KAFKA_TOPIC: final_latency_data
+      PUSH_GATEWAY_ENDPOINT: "prom-pushgateway:9091"
       BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
-      SASL_USERNAME: $SASL_USERNAME
-      SASL_PASSWORD: $SASL_PASSWORD
+      KAFKA_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
       SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
       SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+      CONSUMER_GROUP_ID: kfk-prom-push
     networks:
       - connect-sandbox
 

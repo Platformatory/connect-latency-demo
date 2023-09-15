@@ -20,10 +20,6 @@ export CONNECT_SASL_JAAS_CONFIG=
 export CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=
 export CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO=
 
-# For the Kafka Prometheus Push service
-export SASL_USERNAME=
-export SASL_PASSWORD=
-
 # For the KSQL service (comma-separated list of topics)
 export INPUT_TOPICS=connect_latency
 ```
