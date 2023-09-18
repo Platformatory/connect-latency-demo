@@ -39,7 +39,7 @@ services:
       CONNECT_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
       CONNECT_SASL_MECHANISM: PLAIN
-      CONNECT_TOPIC_CREATION_ENABLE: true
+      CONNECT_TOPIC_CREATION_ENABLE: "true"
       # Connect producer
       CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
@@ -92,7 +92,7 @@ services:
       POSTGRES_PASSWORD: postgres_password
       POSTGRES_DB: postgres_db
     volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
       - postgres_data:/var/lib/postgresql/data
       - ./postgresql.conf:/etc/postgresql/postgresql.conf
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
@@ -111,7 +111,7 @@ services:
       MYSQL_PASSWORD: mysql_password
     volumes:
       - mysql_data:/var/lib/mysql
-
+      - ./init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
   pgloader:
     image: python:3
     networks: 
