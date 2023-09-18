@@ -17,6 +17,6 @@ CREATE TABLE `jdbc-source-orders` (
     sink_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     user_id INT,
     total_price DECIMAL(10, 2),
-    status VARCHAR(50),
+    status VARCHAR(50)
 );
 
