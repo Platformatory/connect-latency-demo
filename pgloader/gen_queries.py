@@ -33,8 +33,14 @@ for table_name in table_names:
         if i < args.num_queries * args.insert_ratio:
             # Generate INSERT queries
             values = []
+            column_names_to_insert = []
             for column in (schema[1:] if is_serial else schema):
-                column_name, data_type, _, max_length = column
+                column_name, data_type, column_default, max_length = column
+
+                # Skip source_time if it has default value CURRENT_TIMESTAMP
+                if column_name.lower() == "source_time" and column_default == 'CURRENT_TIMESTAMP':
+                    continue
+                
                 if data_type == 'integer':
                     value = fake.random_int()
                 elif data_type == 'numeric':
@@ -48,8 +54,9 @@ for table_name in table_names:
                 
                 if value is not None:
                     values.append(f"'{value}'" if isinstance(value, str) else value)
+                    column_names_to_insert.append(column_name)
 
-            query = f"INSERT INTO {table_name} ({', '.join([column[0] for column in (schema[1:] if is_serial else schema)])}) VALUES ({', '.join(map(str, values))})"
+            query = f"INSERT INTO {table_name} ({', '.join(column_names_to_insert)}) VALUES ({', '.join(map(str, values))})"
             queries.append(query)
         else:
             # Generate UPDATE queries
