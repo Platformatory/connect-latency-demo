@@ -1,12 +1,12 @@
 version: '3.8'
 services:
-  init:
-    image: maven:3.5-jdk-11
-    working_dir: /mnt/interceptor
-    command: mvn clean package
-    volumes:
-      - ./interceptor:/mnt/interceptor
-    restart: on-failure
+#  init:
+#    image: maven:3.5-jdk-11
+#    working_dir: /mnt/interceptor
+#    command: mvn clean package
+#    volumes:
+#      - ./interceptor:/mnt/interceptor
+#    restart: on-failure
   connect:
     build:
       context: .
