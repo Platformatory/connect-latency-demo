@@ -2,6 +2,16 @@
 
 ## Setup
 
+```sh
+# Clone using SSH
+git clone git@github.com:Platformatory/connect-sandbox.git
+```
+
+```sh
+# This is run only once after cloning the repo
+git submodule update --init --recursive
+```
+
 ### Environment variables
 
 ```bash
@@ -9,10 +19,6 @@ export BOOTSTRAP_SERVERS=
 export CONNECT_SASL_JAAS_CONFIG=
 export CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=
 export CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO=
-
-# For the Kafka Prometheus Push service
-export SASL_USERNAME=
-export SASL_PASSWORD=
 
 # For the KSQL service (comma-separated list of topics)
 export INPUT_TOPICS=connect_latency
@@ -23,6 +29,10 @@ export INPUT_TOPICS=connect_latency
 ## Start
 
 ```bash
+docker-compose up -d init
+# Wait for the init container to exit with code 0
+# The init container builds the Interceptor jar
+
 docker-compose up -d
 ```
 

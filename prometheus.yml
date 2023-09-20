@@ -30,13 +30,9 @@ scrape_configs:
         target_label: hostname
         regex: '([^:]+)(:[0-9]+)?'
         replacement: '${1}'
-  - job_name: dev-push-gateway
-    metrics_path: /metrics
-    scheme: http
+  - job_name: "push-gateway"
     static_configs:
-      - targets: ['localhost:9091']
-        labels:
-          service: 'prom-pushgateway'
+      - targets: ['prom-pushgateway:9091']
 
   # No producer for the moment in cp-demo
   # - job_name: 'kafka-producer'

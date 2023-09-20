@@ -18,7 +18,7 @@ for ((i=0; i<=${#values[@]} - 1; i++)); do
     arg="${values[i]}"
     text="$text
 
-CREATE STREAM IF NOT EXISTS "$arg"_input_stream (
+CREATE STREAM IF NOT EXISTS \""$arg"_input_stream\"(
     correlation_id STRING,
     connect_pipeline_id STRING,
     timestamp_type STRING,
@@ -31,10 +31,10 @@ CREATE STREAM IF NOT EXISTS "$arg"_input_stream (
     if [ "$i" == 0 ]; then
         text="$text
 CREATE STREAM IF NOT EXISTS connect_latency_stream WITH (kafka_topic='connect_latency_stream', value_format='AVRO', partitions=1) AS 
-SELECT * FROM "$arg"_input_stream;"
+SELECT * FROM \""$arg"_input_stream\";"
     else
         text="$text
-INSERT INTO connect_latency_stream SELECT * FROM "$arg"_input_stream;"
+INSERT INTO connect_latency_stream SELECT * FROM \""$arg"_input_stream\";"
     fi
 done
 
@@ -61,6 +61,7 @@ FROM connect_latency_table WHERE ARRAY_CONTAINS(MAP_KEYS(timestamp_data), 'sink'
 "
 
 echo "$text" > /home/appuser/queries.sql
+
 
 # Execute "/usr/bin/docker/run"
 exec /usr/bin/docker/run
