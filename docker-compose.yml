@@ -149,7 +149,8 @@ services:
     volumes:
       - ./grafana_prometheus_datasource.yml:/etc/grafana/provisioning/datasources/grafana_prometheus_datasource.yaml
       - ./grafana_kconnect_dashboard.yaml:/etc/grafana/provisioning/dashboards/grafana_kconnect_dashboard.yaml
-      - ./grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json      
+      - ./grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json
+      - ./grafana_prometheus_connect_e2e_latency.json:/etc/grafana/grafana_prometheus_connect_e2e_latency.json
     networks:
       - connect-sandbox
 
