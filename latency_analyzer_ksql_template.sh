@@ -53,7 +53,10 @@ table_key,
 UNIX_TIMESTAMP() as ts,
 correlation_id,
 connect_pipeline_id,
-(timestamp_data['sink'] - timestamp_data['source']) as e2e_latency
+(timestamp_data['sink'] - timestamp_data['source']) as E2E_LATENCY,
+(timestamp_data['broker'] - timestamp_data['source']) AS SOURCE_PRODUCE_LATENCY, 
+(timestamp_data['consume'] - timestamp_data['broker']) AS SINK_CONSUME_LATENCY, 
+(timestamp_data['sink'] - timestamp_data['consume']) AS SINK_FLUSH_LATENCY 
 FROM connect_latency_table WHERE ARRAY_CONTAINS(MAP_KEYS(timestamp_data), 'sink');
 "
 
