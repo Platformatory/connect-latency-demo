@@ -18,7 +18,14 @@ PAYLOAD=$(cat <<- JSON
     "database.password": "postgres_password",
     "topic.prefix": "debzcdc",
     "topic.creation.default.replication.factor": 3,
-    "topic.creation.default.partitions": 6 
+    "topic.creation.default.partitions": 6,
+   "producer.override.source.time.field": "value.after.source_time",
+    "producer.override.sampling.rate": 0.5,
+    "producer.override.source.serializer": "io.confluent.connect.avro.AvroConverter",
+    "producer.override.connect.pipeline.id": "CDCPipeline",
+    "producer.override.source.value.schema.registry.url": "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL",
+    "producer.override.source.value.basic.auth.credentials.source": "USER_INFO",
+    "producer.override.source.value.schema.registry.basic.auth.user.info": "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
   }
 }
 JSON

@@ -7,7 +7,7 @@ sasl.jaas.config=$CONNECT_SASL_JAAS_CONFIG
 security.protocol=SASL_SSL
 sasl.mechanism=PLAIN"
 
-topics_to_delete=$(echo "$CONFIG_STRING" | kafka-topics --bootstrap-server $BOOTSTRAP_SERVERS --list --command-config /dev/stdin | grep -i -E "connect|debzcdc|jdbc")
+topics_to_delete=$(echo "$CONFIG_STRING" | kafka-topics --bootstrap-server $BOOTSTRAP_SERVERS --list --command-config /dev/stdin | grep -i -E "connect|debzcdc|jdbc|latency")
 
 echo "Topics to delete: $topics_to_delete"
 

@@ -1,5 +1,12 @@
 version: '3.8'
 services:
+#  init:
+#    image: maven:3.5-jdk-11
+#    working_dir: /mnt/interceptor
+#    command: mvn clean package
+#    volumes:
+#      - ./interceptor:/mnt/interceptor
+#    restart: on-failure
   connect:
     build:
       context: .
@@ -34,31 +41,97 @@ services:
       CONNECT_LOG4J_ROOT_LOGLEVEL: INFO
       CONNECT_LOG4J_LOGGERS: org.reflections=ERROR
       # CLASSPATH required due to CC-2422
-      CLASSPATH: /usr/share/java/monitoring-interceptors/monitoring-interceptors-6.2.0.jar
+      CLASSPATH: /usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
       # Connect worker
       CONNECT_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
       CONNECT_SASL_MECHANISM: PLAIN
       CONNECT_TOPIC_CREATION_ENABLE: "true"
       # Connect producer
+      CONNECT_PRODUCER_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
       CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
       CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
-      #CONNECT_PRODUCER_INTERCEPTOR_CLASSES: io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
-      #CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: SASL_SSL
-      #CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
-      #CONNECT_PRODUCER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: PLAIN
+      CONNECT_PRODUCER_SCHEMA_REGISTRY_URL: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
+      CONNECT_PRODUCER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+      CONNECT_PRODUCER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
+      CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "com.platformatory.kafka.connect.latencyanalyzer.SourceTimeProducerInterceptor"
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SASL_MECHANISM: PLAIN
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_URL: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+      CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
+      CONNECT_PRODUCER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: connect_latency_telemetry
+      #CONNECT_PRODUCER_SOURCE_TIME_FIELD: 
+      #CONNECT_PRODUCER_CONNECT_PIPELINE_ID: PostgresToMYSQLPipeline
       # Connect consumer
       CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_SSL
       CONNECT_CONSUMER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
       CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
-      #CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
-      #CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SECURITY_PROTOCOL: SASL_SSL
-      #CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
-      #CONNECT_CONSUMER_CONFLUENT_MONITORING_INTERCEPTOR_SASL_MECHANISM: PLAIN
+      CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "com.platformatory.kafka.connect.latencyanalyzer.SinkTimeConsumerInterceptor"
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SECURITY_PROTOCOL: SASL_SSL
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SASL_MECHANISM: PLAIN
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_URL: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
+      CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
+      CONNECT_CONSUMER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: connect_latency_telemetry
+
+
     volumes: 
+      - ./interceptor/target/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
       - ./jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
       - ./kafka-connect.yml:/etc/jmx-kafka-connect.yaml
+      - ./json-spooldir-source.json:/home/appuser/data/source/json-spooldir-source.json
+
+  ksqldb-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile.ksql
+    hostname: ksqldb-server
+    container_name: ksqldb-server
+    ports:
+      - "8088:8088"
+    environment:
+      KSQL_LISTENERS: http://0.0.0.0:8088
+      KSQL_BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      KSQL_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      KSQL_SECURITY_PROTOCOL: SASL_SSL
+      KSQL_SASL_MECHANISM: PLAIN
+      KSQL_KSQL_INTERNAL_TOPIC_REPLICAS: 3
+      KSQL_KSQL_SINK_REPLICAS: 3
+      KSQL_KSQL_STREAMS_REPLICATION_FACTOR: 3
+      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 3
+      # KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+      # KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: USER_INFO
+      KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+      KSQL_KSQL_QUERIES_FILE: /home/appuser/queries.sql
+      KSQL_INPUT_TOPICS: $INPUT_TOPICS
+
+  kafka-prom-push:
+    build: ./latency-kafka-prom-push
+    environment:
+      KAFKA_TOPIC: final_latency_data
+      PUSH_GATEWAY_ENDPOINT: "prom-pushgateway:9091"
+      BOOTSTRAP_SERVERS: $BOOTSTRAP_SERVERS
+      KAFKA_SASL_JAAS_CONFIG: $CONNECT_SASL_JAAS_CONFIG
+      SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
+      SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
+      CONSUMER_GROUP_ID: kfk-prom-psh
+    networks:
+      - connect-sandbox
+
+  prom-pushgateway:
+    image: prom/pushgateway:latest
+    ports:
+      - 9091:9091
+    networks:
+      - connect-sandbox
 
   prometheus:
     image: prom/prometheus:latest
@@ -76,7 +149,8 @@ services:
     volumes:
       - ./grafana_prometheus_datasource.yml:/etc/grafana/provisioning/datasources/grafana_prometheus_datasource.yaml
       - ./grafana_kconnect_dashboard.yaml:/etc/grafana/provisioning/dashboards/grafana_kconnect_dashboard.yaml
-      - ./grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json      
+      - ./grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json
+      - ./grafana_prometheus_connect_e2e_latency.json:/etc/grafana/grafana_prometheus_connect_e2e_latency.json
     networks:
       - connect-sandbox
 
