@@ -14,11 +14,14 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:8083); d
     sleep 10
 done
 
+echo ""
 echo "Creating JDBC postgres source connector"
 ./create_jdbc_postgres_source.sh
 
 sleep 20
 
+echo ""
+echo ""
 echo "Creating JDBC MySQL sink connector"
 ./create_jdbc_mysql_sink.sh
 

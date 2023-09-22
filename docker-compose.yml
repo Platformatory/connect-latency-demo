@@ -79,18 +79,17 @@ services:
       CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
       CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
       CONNECT_CONSUMER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: connect_latency_telemetry
-
-
     volumes: 
-      - ./interceptor/target/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
+      - ./latency-interceptors/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
       - ./jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
       - ./kafka-connect.yml:/etc/jmx-kafka-connect.yaml
       - ./json-spooldir-source.json:/home/appuser/data/source/json-spooldir-source.json
 
   ksqldb-server:
-    build: 
-      context: .
-      dockerfile: Dockerfile.ksql
+    image: platformatorylabs/latency-analyzer:1.0.0
+    # build: 
+    #   context: .
+    #   dockerfile: Dockerfile.ksql
     hostname: ksqldb-server
     container_name: ksqldb-server
     ports:
@@ -114,7 +113,8 @@ services:
       KSQL_INPUT_TOPICS: $INPUT_TOPICS
 
   kafka-prom-push:
-    build: ./latency-kafka-prom-push
+    image: platformatorylabs/kafka-prom-push:1.0.0
+    # build: ./latency-kafka-prom-push
     environment:
       KAFKA_TOPIC: final_latency_data
       PUSH_GATEWAY_ENDPOINT: "prom-pushgateway:9091"

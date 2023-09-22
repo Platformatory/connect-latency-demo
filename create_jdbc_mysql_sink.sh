@@ -27,8 +27,10 @@ curl -s -X POST -H "Content-Type: application/json" --data "$CONFIG_JSON" "$KAFK
 
 # Output message
 if [ $? -eq 0 ]; then
+  echo ""
   echo "Successfully created MySQL JDBC Sink connector $CONNECTOR_NAME."
 else
+  echo ""
   echo "Failed to create MySQL JDBC Sink connector. Check your Kafka Connect cluster and configurations."
 fi
 
