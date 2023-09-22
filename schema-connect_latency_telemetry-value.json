@@ -1,0 +1,4 @@
+{
+  "schema": "{\"type\": \"record\", \"name\": \"Timestamps\", \"namespace\": \"com.platformatory.kafka.connect.latencyanalyzer\", \"fields\": [{\"type\": \"string\", \"name\": \"correlation_id\"}, {   \"type\": \"string\",   \"name\": \"connect_pipeline_id\"}, {\"type\": \"string\", \"name\": \"timestamp_type\"}, {\"type\": \"long\", \"name\": \"timestamp\" }]}",
+  "schemaType": "AVRO"
+}

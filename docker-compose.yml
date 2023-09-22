@@ -92,6 +92,8 @@ services:
     #   dockerfile: Dockerfile.ksql
     hostname: ksqldb-server
     container_name: ksqldb-server
+    depends_on:
+      - connect
     ports:
       - "8088:8088"
     environment:
@@ -123,6 +125,9 @@ services:
       SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
       SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
       CONSUMER_GROUP_ID: kfk-prom-psh
+    depends_on:
+      - connect
+      - ksqldb-server
     networks:
       - connect-sandbox
 
@@ -130,6 +135,9 @@ services:
     image: prom/pushgateway:latest
     ports:
       - 9091:9091
+    depends_on:
+      - connect
+      - ksqldb-server
     networks:
       - connect-sandbox
 
@@ -137,6 +145,9 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - connect
+      - ksqldb-server
     ports:
       - 9090:9090
     networks:
@@ -146,6 +157,9 @@ services:
     image: grafana/grafana:latest
     ports:
       - 3000:3000
+    depends_on:
+      - connect
+      - ksqldb-server
     volumes:
       - ./grafana_prometheus_datasource.yml:/etc/grafana/provisioning/datasources/grafana_prometheus_datasource.yaml
       - ./grafana_kconnect_dashboard.yaml:/etc/grafana/provisioning/dashboards/grafana_kconnect_dashboard.yaml
