@@ -1,10 +1,9 @@
 #!/bin/bash
+set -e  # Exit on any error
+source .env  # Source .env from the script's directory
 
-source .env
-
-echo "Creating telemetry topic ..."
-./setup_kafka_cluster.sh
-echo "Telemetry topic created"
+./scripts/setup_kafka_cluster.sh
+echo "Prepped Kafka Cluster, including Telemetry topic"
 
 echo "Bringing up docker compose environment"
 docker-compose up -d
@@ -14,21 +13,21 @@ until $(curl --output /dev/null --silent --head --fail http://localhost:8083); d
     sleep 10
 done
 
-echo ""
 echo "Creating JDBC postgres source connector"
-./create_jdbc_postgres_source.sh
+./scripts/create_jdbc_postgres_source.sh
 
-sleep 20
+SLEEP_DURATION=${SLEEP_DURATION:-20}  # Use the value of SLEEP_DURATION if set, otherwise default to 20
+sleep $SLEEP_DURATION
 
-echo ""
-echo ""
 echo "Creating JDBC MySQL sink connector"
-./create_jdbc_mysql_sink.sh
+./scripts/create_jdbc_mysql_sink.sh
 
-sleep 30
+SLEEP_DURATION=${SLEEP_DURATION:-30}  # Use the value of SLEEP_DURATION if set, otherwise default to 30
+sleep $SLEEP_DURATION
 
 echo "Creating database load"
 for i in {1..5}
 do
-	./create_database_load.sh
+  ./scripts/create_database_load.sh
 done
+
