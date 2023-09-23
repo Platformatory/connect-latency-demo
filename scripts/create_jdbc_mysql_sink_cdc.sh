@@ -3,9 +3,9 @@ source .env
 
 CONNECT_REST_API="http://localhost:8083/connectors" 
 CONNECTOR_NAME="cdc-jdbc-sink-connector" 
-JDBC_URL="jdbc:mysql://mysql:3306/mysql_db"
-DB_USER="mysql_user"
-DB_PASSWORD="mysql_password"
+JDBC_URL="jdbc:mysql://mysql:3306/mysql_db" 
+DB_USER="mysql_user" 
+DB_PASSWORD="mysql_password" 
 TOPICS_REGEX="debzcdc\\\\.public\\\\..*"
 
 PAYLOAD=$(cat <<EOF
@@ -20,6 +20,8 @@ PAYLOAD=$(cat <<EOF
     "topics.regex": "$TOPICS_REGEX",
     "auto.create": "true",
     "insert.mode": "upsert",
+    "pk.mode": "record_value",
+    "pk.fields": "id",
     "transforms": "unwrap,reroute",
     "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
     "transforms.unwrap.drop.tombstones": "false",
