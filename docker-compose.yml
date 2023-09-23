@@ -63,7 +63,7 @@ services:
       CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_URL: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
       CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
       CONNECT_PRODUCER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
-      CONNECT_PRODUCER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: connect_latency_telemetry
+      CONNECT_PRODUCER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: $TELEMETRY_TOPIC
       #CONNECT_PRODUCER_SOURCE_TIME_FIELD: 
       #CONNECT_PRODUCER_CONNECT_PIPELINE_ID: PostgresToMYSQLPipeline
       # Connect consumer
@@ -78,7 +78,7 @@ services:
       CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_URL: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL"
       CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_BASIC_AUTH_CREDENTIALS_SOURCE: "USER_INFO"
       CONNECT_CONSUMER_LATENCY_INTERCEPTOR_PRODUCER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: "$CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO"
-      CONNECT_CONSUMER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: connect_latency_telemetry
+      CONNECT_CONSUMER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: $TELEMETRY_TOPIC
     volumes: 
       - ./latency-interceptors/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
       - ./jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
@@ -112,7 +112,7 @@ services:
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: USER_INFO
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
       KSQL_KSQL_QUERIES_FILE: /home/appuser/queries.sql
-      KSQL_INPUT_TOPICS: $INPUT_TOPICS
+      KSQL_INPUT_TOPICS: $TELEMETRY_TOPIC
 
   kafka-prom-push:
     image: platformatorylabs/kafka-prom-push:1.0.0
@@ -161,10 +161,10 @@ services:
       - connect
       - ksqldb-server
     volumes:
-      - ./grafana_prometheus_datasource.yml:/etc/grafana/provisioning/datasources/grafana_prometheus_datasource.yaml
-      - ./grafana_kconnect_dashboard.yaml:/etc/grafana/provisioning/dashboards/grafana_kconnect_dashboard.yaml
-      - ./grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json
-      - ./grafana_prometheus_connect_e2e_latency.json:/etc/grafana/grafana_prometheus_connect_e2e_latency.json
+      - ./grafana/grafana_prometheus_datasource.yml:/etc/grafana/provisioning/datasources/grafana_prometheus_datasource.yaml
+      - ./grafana/grafana_kconnect_dashboard.yaml:/etc/grafana/provisioning/dashboards/grafana_kconnect_dashboard.yaml
+      - ./grafana/grafana_prometheus_connect_dashboard.json:/etc/grafana/grafana_prometheus_connect_dashboard.json
+      - ./grafana/grafana_prometheus_connect_e2e_latency.json:/etc/grafana/grafana_prometheus_connect_e2e_latency.json
     networks:
       - connect-sandbox
 
