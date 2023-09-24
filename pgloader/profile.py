@@ -4,6 +4,7 @@ import argparse
 import pymysql
 import csv
 import random
+import numpy as np
 from datetime import datetime
 
 # Parse command-line arguments
@@ -31,6 +32,7 @@ with open(args.output_csv, 'w', newline='') as csvfile:
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(['Table', 'Primary_Key', 'Sink_Time', 'Source_Time', 'Latency'])
 
+    latencies = []
     for table in args.tables.split(","):
         # Get all primary keys from MySQL
         mysql_cursor.execute(f"SELECT id FROM `{table}`")
@@ -47,7 +49,21 @@ with open(args.output_csv, 'w', newline='') as csvfile:
             if mysql_row:
                 primary_key, sink_time, source_time = mysql_row
                 latency = (sink_time - source_time).total_seconds()
+                latencies.append(latency)
                 csv_writer.writerow([table, primary_key, sink_time, source_time, latency])
+
+    if latencies:
+        latencies = np.array(latencies)
+        average_latency = np.mean(latencies)
+        p90 = np.percentile(latencies, 90)
+        p95 = np.percentile(latencies, 95)
+        p99 = np.percentile(latencies, 99)
+
+        # Here you can either write these values into your output CSV or print them out as you prefer
+        print(f"Average Latency: {average_latency}s")
+        print(f"90th percentile latency: {p90}s")
+        print(f"95th percentile latency: {p95}s")
+        print(f"99th percentile latency: {p99}s")
 
 # Close connection
 mysql_conn.close()

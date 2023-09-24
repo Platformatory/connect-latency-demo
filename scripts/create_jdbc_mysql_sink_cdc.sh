@@ -13,7 +13,7 @@ PAYLOAD=$(cat <<EOF
   "name": "$CONNECTOR_NAME",
   "config": {
     "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
-    "tasks.max": "1",
+    "tasks.max": "4",
     "connection.url": "$JDBC_URL",
     "connection.user": "$DB_USER",
     "connection.password": "$DB_PASSWORD",

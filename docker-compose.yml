@@ -81,10 +81,8 @@ services:
       CONNECT_CONSUMER_CONNECT_LATENCY_ANALYZER_TELEMETRY_TOPIC_NAME: $TELEMETRY_TOPIC
     volumes: 
       - ./latency-interceptors/Interceptor-1.0-SNAPSHOT.jar:/usr/share/java/latency-interceptors/kafka-interceptor-latency.jar
-      - ./jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
-      - ./kafka-connect.yml:/etc/jmx-kafka-connect.yaml
-      - ./json-spooldir-source.json:/home/appuser/data/source/json-spooldir-source.json
-
+      - ./jars/jmx_prometheus_javaagent-0.20.0.jar:/usr/share/java/kafka/jmx_prometheus_javaagent.jar
+      - ./prometheus/kafka-connect.yml:/etc/jmx-kafka-connect.yaml
   ksqldb-server:
     image: platformatorylabs/latency-analyzer:1.0.0
     # build: 
@@ -108,6 +106,7 @@ services:
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_REPLICATION_FACTOR: 3
       # KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       # KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_STREAMS_NUM_STREAM_THREADS: 4
       KSQL_KSQL_SCHEMA_REGISTRY_URL: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_CREDENTIALS_SOURCE: USER_INFO
       KSQL_KSQL_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO: $CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO
@@ -144,7 +143,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
       - connect
       - ksqldb-server
@@ -180,9 +179,9 @@ services:
       POSTGRES_PASSWORD: postgres_password
       POSTGRES_DB: postgres_db
     volumes:
-      - ./init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
+      - ./database/init-postgres.sql:/docker-entrypoint-initdb.d/init-postgres.sql
       - postgres_data:/var/lib/postgresql/data
-      - ./postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./database/postgresql.conf:/etc/postgresql/postgresql.conf
     command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
   mysql:
@@ -199,7 +198,7 @@ services:
       MYSQL_PASSWORD: mysql_password
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
+      - ./database/init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
   pgloader:
     image: python:3
     networks: 

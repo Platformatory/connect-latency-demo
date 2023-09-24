@@ -11,6 +11,7 @@ CONFIG_JSON=$(cat <<- JSON
   "config": {
     "connector.class": "io.confluent.connect.jdbc.JdbcSinkConnector",
     "connection.url": "jdbc:mysql://mysql:3306/mysql_db",
+    "tasks.max": 4,
     "connection.user": "mysql_user",
     "connection.password": "mysql_password",
     "auto.create": "true",

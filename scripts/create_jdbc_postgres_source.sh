@@ -25,6 +25,7 @@ CONFIG_JSON=$(cat <<- JSON
     "topic.creation.default.partitions": 6,
     "table.whitelist": "orders,users",
     "poll.interval.ms": 60000,
+    "tasks.mx": 2,
     "batch.max.rows": 100
   }
 }
