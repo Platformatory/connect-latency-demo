@@ -1,5 +1,5 @@
 #!/bin/bash
-
+source .env
 # Variables
 KAFKA_CONNECT_URL="http://localhost:8083" # Update with your Kafka Connect URL
 CONNECTOR_NAME="CDCConnector"
@@ -19,7 +19,8 @@ PAYLOAD=$(cat <<- JSON
     "topic.prefix": "debzcdc",
     "topic.creation.default.replication.factor": 3,
     "topic.creation.default.partitions": 6,
-   "producer.override.source.time.field": "value.after.source_time",
+    "producer.override.source.time.field": "value.ts_ms",
+    "time.precision.mode": "connect",
     "producer.override.sampling.rate": 0.5,
     "producer.override.source.serializer": "io.confluent.connect.avro.AvroConverter",
     "producer.override.connect.pipeline.id": "CDCPipeline",

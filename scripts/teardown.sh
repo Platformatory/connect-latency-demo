@@ -23,3 +23,4 @@ done
 
 echo "nuked all"
 
+docker-compose down --volume
