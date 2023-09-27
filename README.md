@@ -1,16 +1,6 @@
-# Kafka Connect Sandbox
+# Kafka Connect Latency Demo Sandbox
 
 ## Setup
-
-```sh
-# Clone using SSH
-git clone git@github.com:Platformatory/connect-sandbox.git
-```
-
-```sh
-# This is run only once after cloning the repo
-git submodule update --init --recursive
-```
 
 ### Environment variables
 
@@ -20,8 +10,10 @@ export CONNECT_SASL_JAAS_CONFIG=
 export CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL=
 export CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_BASIC_AUTH_USER_INFO=
 
+export TELEMETRY_TOPIC=connect_latency_telemetry
+
 # For the KSQL service (comma-separated list of topics)
-export INPUT_TOPICS=connect_latency_telemetry
+export INPUT_TOPICS=$TELEMETRY_TOPIC
 ```
 
 > Certain scripts expect the environment variables in a `.env` file. Place the above snippet in a `.env` file before using the scripts

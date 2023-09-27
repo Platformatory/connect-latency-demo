@@ -1,6 +1,0 @@
-[submodule "latency-kafka-prom-push"]
-	path = latency-kafka-prom-push
-	url = git@github.com:Platformatory/latency-kafka-prom-push.git
-[submodule "interceptor"]
-	path = interceptor
-	url = git@github.com:Platformatory/connect-latency-interceptor.git
